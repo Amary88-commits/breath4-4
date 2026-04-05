@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Круг дыхания | Дыхание 4*4</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #2b1a3f 0%, #231b3a 100%);
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f0e0fa;
+            padding: 12px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            position: relative;
+            background: rgba(44, 22, 51, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 24px 20px;
+            box-shadow: 0 25px 40px -10px rgba(30, 10, 40, 0.6);
+            border: 1px solid rgba(180, 130, 220, 0.3);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+        }
+
+        h2 {
+            font-weight: 350;
+            font-size: clamp(1.5rem, 6vw, 1.8rem);
+            text-align: center;
+            margin: 0 0 16px 0;
+            color: #e2c4ff;
+            text-shadow: 0 2px 5px #2c0a1e;
+        }
+
+        .timer-settings {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            background: #33224f;
+            padding: 12px 16px;
+            border-radius: 100px;
+            border: 1px solid #9b7fd0;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            flex-wrap: wrap;
+        }
+
+        .timer-settings label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: #e0c6ff;
+        }
+
+        .timer-settings input {
+            width: 60px;
+            padding: 8px;
+            border-radius: 40px;
+            border: none;
+            background: #1f0f2b;
+            color: #f0ddff;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            text-align: center;
+            border: 1px solid #a07dd6;
+            outline: none;
+        }
+
+        /* Звуковые настройки */
+        .sound-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 20px;
+            padding: 8px 16px;
+            background: rgba(51, 34, 79, 0.6);
+            border-radius: 100px;
+            border: 1px solid rgba(155, 127, 208, 0.4);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sound-toggle {
+            background: none;
+            border: none;
+            color: #e0c6ff;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(155, 127, 208, 0.2);
+            transform: scale(1.05);
+        }
+
+        .sound-toggle.muted {
+            color: #9b7fd0;
+            opacity: 0.7;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-control.hidden {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            overflow: hidden;
+        }
+
+        .volume-icon {
+            font-size: 1rem;
+            color: #c9a8e8;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        #volumeSlider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(155, 127, 208, 0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d4a8ff;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.15s ease;
+        }
+
+        #volumeSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        #volumeSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #d4a8ff;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .sound-selector {
+            display: flex;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .sound-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid rgba(155, 127, 208, 0.5);
+            background: rgba(31, 15, 43, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            color: #c9a8e8;
+        }
+
+        .sound-option:hover {
+            border-color: #d4a8ff;
+            transform: scale(1.1);
+        }
+
+        .sound-option.active {
+            border-color: #d4a8ff;
+            background: rgba(212, 168, 255, 0.25);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(212, 168, 255, 0.4);
+        }
+
+        .sound-option[data-sound="silence"] {
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .circle-wrapper {
+            position: relative;
+            width: min(300px, 75vw);
+            height: min(300px, 75vw);
+            margin: 10px auto 25px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+        }
+
+        #progressRing { z-index: 2; }
+        #backgroundRing { z-index: 1; }
+        #cloudEffect { 
+            z-index: 3; 
+            pointer-events: none; 
+            opacity: 0.8;
+            mix-blend-mode: screen;
+        }
+
+        .phase-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .phase-name {
+            font-size: clamp(2rem, 10vw, 2.8rem);
+            font-weight: 500;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px #b34cff;
+            background: linear-gradient(135deg, #fff0fc, #f5d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .phase-hint {
+            font-size: clamp(0.9rem, 3.5vw, 1.25rem);
+            background: rgba(48, 20, 60, 0.6);
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid #c09be0;
+            color: #f2dcff;
+            display: inline-block;
+        }
+
+        .timer-display {
+            font-size: clamp(2rem, 8vw, 2.2rem);
+            text-align: center;
+            background: #33204a;
+            padding: 12px;
+            border-radius: 80px;
+            width: min(200px, 60%);
+            margin: 10px auto 20px;
+            border: 1px solid #b88bef;
+            color: #ecd6ff;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #4b2c6b;
+            border: none;
+            color: white;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            padding: 14px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #281a32;
+            border: 1px solid #cc99ff;
+            min-width: 120px;
+            transition: all 0.2s ease;
+        }
+
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #281a32;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            color: #b394d6;
+            font-size: 0.9rem;
+        }
+
+        /* Затемняющий оверлей */
+        .completion-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 5, 30, 0.85);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease, visibility 0s 1.5s;
+            border-radius: 48px;
+            z-index: 50;
+        }
+
+        .completion-overlay.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1.5s ease, visibility 0s 0s;
+        }
+
+        /* Стиль для текста завершения */
+        .completion-text {
+            font-size: clamp(1.8rem, 6vw, 2.4rem);
+            font-weight: 500;
+            text-align: center;
+            color: #fff5e6;
+            text-shadow: 0 0 20px #ffa0e0, 0 0 40px #c080ff;
+            background: linear-gradient(135deg, #ffe6f0, #f0d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gentlePulse 3s infinite ease-in-out;
+            padding: 20px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 1.5s ease, opacity 1.5s ease;
+        }
+
+        .completion-overlay.show .completion-text {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% {
+                text-shadow: 0 0 20px #ffa0e0, 0 0 40px #c080ff;
+            }
+            50% {
+                text-shadow: 0 0 30px #ffc0f0, 0 0 60px #e0a0ff;
+            }
+        }
+
+        /* Адаптив для мобильных */
+        @media (max-width: 400px) {
+            .sound-controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .volume-control {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: 4px;
+            }
+            #volumeSlider {
+                width: 120px;
+            }
+            .sound-selector {
+                margin-left: 0;
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>◉ ДЫХАНИЕ 4x4 ◉</h2>
+
+    <div class="timer-settings">
+        <label>⏱️ <input type="number" id="minutesInput" min="1" max="60" value="5"> мин</label>
+    </div>
+
+    <!-- Звуковые настройки -->
+    <div class="sound-controls">
+        <button class="sound-toggle" id="soundToggle" title="Включить/выключить звук">🔊</button>
+        
+        <div class="volume-control" id="volumeControl">
+            <span class="volume-icon">🔈</span>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.7">
+        </div>
+        
+        <div class="sound-selector">
+            <div class="sound-option active" data-sound="bowl" title="Тибетская чаша">🔔</div>
+            <div class="sound-option" data-sound="ocean" title="Океан">🌊</div>
+            <div class="sound-option" data-sound="cat" title="Кот">😻</div>
+            <div class="sound-option" data-sound="rain" title="Дождь">🌧️</div>
+            <div class="sound-option" data-sound="silence" title="Без звука">✕</div>
+        </div>
+    </div>
+
+    <div class="circle-wrapper">
+        <canvas id="backgroundRing" width="340" height="340"></canvas>
+        <canvas id="progressRing" width="340" height="340"></canvas>
+        <canvas id="cloudEffect" width="340" height="340"></canvas>
+        <div class="phase-indicator">
+            <div class="phase-name" id="phaseName">ВДОХ</div>
+            <div class="phase-hint" id="phaseHint">наполняй лёгкие</div>
+        </div>
+    </div>
+
+    <div class="timer-display" id="timeLeft">05:00</div>
+
+    <div class="controls">
+        <button id="resetBtn">↺ СБРОС</button>
+        <button id="startBtn">▶ СТАРТ</button>
+    </div>
+    <div class="footer-note">каждый сектор — 4 секунды (вдох, пауза, выдох, пауза)</div>
+
+    <!-- Оверлей с текстом завершения -->
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-text">🪷 Молодец!🪷<br>Ты умничка!</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ========== ЗВУКОВОЙ МЕНЕДЖЕР С ИСПРАВЛЕННЫМИ ССЫЛКАМИ ==========
+        // Используем надежные источники звуков (Freesound.org и другие открытые источники)
+        const SOUND_LIBRARY = {
+            bowl: 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_a55d0f9a51.mp3',
+            ocean: 'https://cdn.pixabay.com/download/audio/2026/03/10/audio_3b82b8ec69.mp3',
+            cat: 'https://cdn.pixabay.com/download/audio/2024/12/14/audio_c09a4b26e4.mp3',
+            rain: 'https://cdn.pixabay.com/download/audio/2025/05/05/audio_f58cb40be0.mp3',
+            silence: null
+        };
+
+        // Резервные ссылки на случай недоступности основных
+        const FALLBACK_SOUNDS = {
+            bowl: 'https://actions.google.com/sound?title=Tibetan+Bowl&url=https://www.soundjay.com/nature/tibetan-bell-02.mp3',
+            ocean: 'https://www.soundjay.com/nature/ocean-waves-01.mp3',
+            cat: 'https://www.soundjay.com/animals/meow-01.mp3',
+            rain: 'https://www.soundjay.com/nature/rain-01.mp3'
+        };
+
+        class SoundManager {
+            constructor() {
+                this.audio = null;
+                this.currentSound = 'bowl';
+                this.volume = 0.7;
+                this.isEnabled = true;
+                this.isPlaying = false;
+                this.userInteracted = false;
+                this.loopTimeout = null;
+                this.currentUrl = null;
+                
+                // Загружаем сохранённые настройки
+                this.loadSettings();
+            }
+
+            loadSettings() {
+                const savedVolume = localStorage.getItem('meditation_volume');
+                const savedSound = localStorage.getItem('meditation_sound');
+                const savedEnabled = localStorage.getItem('meditation_sound_enabled');
+                
+                if (savedVolume !== null) this.volume = parseFloat(savedVolume);
+                if (savedSound !== null && SOUND_LIBRARY[savedSound] !== undefined) this.currentSound = savedSound;
+                if (savedEnabled !== null) this.isEnabled = savedEnabled === 'true';
+            }
+
+            saveSettings() {
+                localStorage.setItem('meditation_volume', this.volume.toString());
+                localStorage.setItem('meditation_sound', this.currentSound);
+                localStorage.setItem('meditation_sound_enabled', this.isEnabled.toString());
+            }
+
+            async init() {
+                this.audio = new Audio();
+                this.audio.loop = false;
+                this.audio.volume = this.isEnabled ? this.volume : 0;
+                this.audio.crossOrigin = "anonymous";
+                
+                // Обработчик окончания трека
+                this.audio.addEventListener('ended', () => {
+                    if (this.isEnabled && this.currentSound !== 'silence' && this.userInteracted && this.isPlaying) {
+                        this.restartTrack();
+                    }
+                });
+                
+                // Обработчик ошибок с попыткой использовать fallback
+                this.audio.addEventListener('error', (e) => {
+                    console.warn('Ошибка загрузки звука:', this.currentSound, e);
+                    this.tryFallbackSound();
+                });
+                
+                await this.loadCurrentSound();
+            }
+
+            tryFallbackSound() {
+                if (this.currentSound !== 'silence' && FALLBACK_SOUNDS[this.currentSound]) {
+                    console.log('Пробуем загрузить резервный звук для:', this.currentSound);
+                    const fallbackUrl = FALLBACK_SOUNDS[this.currentSound];
+                    this.audio.src = fallbackUrl;
+                    this.audio.load();
+                    
+                    if (this.userInteracted && this.isEnabled && !this.isPlaying) {
+                        this.audio.play().catch(e => console.log('Ошибка воспроизведения резервного звука:', e));
+                    }
+                }
+            }
+
+            restartTrack() {
+                if (!this.isEnabled || this.currentSound === 'silence' || !this.userInteracted) return;
+                
+                if (this.loopTimeout) clearTimeout(this.loopTimeout);
+                
+                this.loopTimeout = setTimeout(() => {
+                    if (this.isEnabled && this.currentSound !== 'silence' && this.userInteracted && this.isPlaying) {
+                        this.audio.currentTime = 0;
+                        this.audio.play().catch(e => console.log('Ошибка перезапуска трека:', e));
+                    }
+                    this.loopTimeout = null;
+                }, 50);
+            }
+
+            async loadCurrentSound() {
+                if (!this.audio) return;
+                
+                const wasPlaying = this.isPlaying;
+                const currentVolume = this.audio.volume;
+                
+                if (this.currentSound !== 'silence' && this.isEnabled) {
+                    const soundUrl = SOUND_LIBRARY[this.currentSound];
+                    if (soundUrl) {
+                        this.currentUrl = soundUrl;
+                        this.audio.src = soundUrl;
+                        this.audio.volume = currentVolume;
+                        this.audio.load();
+                        
+                        if (wasPlaying && this.userInteracted) {
+                            setTimeout(() => {
+                                this.audio.play().catch(e => {
+                                    console.log('Автовоспроизведение заблокировано:', e);
+                                    this.tryFallbackSound();
+                                });
+                            }, 100);
+                        }
+                    }
+                } else {
+                    this.audio.src = '';
+                    this.audio.volume = 0;
+                }
+            }
+
+            async play() {
+                if (!this.audio || !this.isEnabled || !this.userInteracted) return;
+                if (this.currentSound === 'silence') return;
+                
+                try {
+                    await this.audio.play();
+                    this.isPlaying = true;
+                } catch (e) {
+                    console.log('Воспроизведение требует взаимодействия:', e);
+                }
+            }
+
+            pause() {
+                if (this.audio && this.isPlaying) {
+                    this.audio.pause();
+                    this.isPlaying = false;
+                    
+                    if (this.loopTimeout) {
+                        clearTimeout(this.loopTimeout);
+                        this.loopTimeout = null;
+                    }
+                }
+            }
+
+            setVolume(value) {
+                this.volume = Math.max(0, Math.min(1, value));
+                if (this.audio) {
+                    this.audio.volume = this.isEnabled ? this.volume : 0;
+                }
+                this.saveSettings();
+            }
+
+            toggleEnabled() {
+                this.isEnabled = !this.isEnabled;
+                
+                if (this.audio) {
+                    this.audio.volume = this.isEnabled ? this.volume : 0;
+                    
+                    if (this.isEnabled && this.userInteracted && !this.isPlaying && this.currentSound !== 'silence') {
+                        this.play();
+                    } else if (!this.isEnabled) {
+                        this.pause();
+                    }
+                }
+                
+                this.saveSettings();
+                return this.isEnabled;
+            }
+
+            setSound(soundName) {
+                if (SOUND_LIBRARY[soundName] === undefined) return;
+                if (this.currentSound === soundName) return;
+                
+                console.log('Переключение звука на:', soundName);
+                this.currentSound = soundName;
+                
+                if (soundName === 'silence') {
+                    this.pause();
+                    if (this.audio) this.audio.src = '';
+                } else if (this.isEnabled) {
+                    this.loadCurrentSound();
+                    if (this.userInteracted && !this.isPlaying) {
+                        setTimeout(() => this.play(), 100);
+                    }
+                }
+                
+                this.saveSettings();
+            }
+
+            onUserInteraction() {
+                if (!this.userInteracted) {
+                    this.userInteracted = true;
+                    console.log('Пользователь взаимодействовал, звук разблокирован');
+                }
+                
+                if (this.isEnabled && !this.isPlaying && this.currentSound !== 'silence') {
+                    this.play();
+                }
+            }
+
+            getVolumeIcon() {
+                if (!this.isEnabled) return '🔇';
+                if (this.volume === 0) return '🔇';
+                if (this.volume < 0.4) return '🔈';
+                if (this.volume < 0.8) return '🔉';
+                return '🔊';
+            }
+        }
+
+        // ========== КОНСТАНТЫ ДЫХАТЕЛЬНОГО ЦИКЛА ==========
+        const CYCLE_PHASES = ['ВДОХ', 'ПАУЗА', 'ВЫДОХ', 'ПАУЗА'];
+        const HINTS = {
+            'ВДОХ': 'наполняй лёгкие',
+            'ПАУЗА': 'задержи дыхание',
+            'ВЫДОХ': 'медленный выдох'
+        };
+        const PHASE_DURATION = 4;
+        const CYCLE_DURATION = 16;
+
+        // Состояние таймера
+        let totalSeconds = 300;
+        let timeRemaining = totalSeconds;
+        let isRunning = false;
+        let sessionStartTime = null;
+        let elapsedBeforeStart = 0;
+        let rafId = null;
+
+        const soundManager = new SoundManager();
+
+        // DOM элементы
+        const canvasBg = document.getElementById('backgroundRing');
+        const canvasFg = document.getElementById('progressRing');
+        const canvasCloud = document.getElementById('cloudEffect');
+        const ctxBg = canvasBg.getContext('2d');
+        const ctxFg = canvasFg.getContext('2d');
+        const ctxCloud = canvasCloud.getContext('2d');
+        const phaseNameEl = document.getElementById('phaseName');
+        const phaseHintEl = document.getElementById('phaseHint');
+        const timeLeftEl = document.getElementById('timeLeft');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const minutesInput = document.getElementById('minutesInput');
+        const completionOverlay = document.getElementById('completionOverlay');
+        
+        const soundToggle = document.getElementById('soundToggle');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeControl = document.getElementById('volumeControl');
+        const soundOptions = document.querySelectorAll('.sound-option');
+
+        let autoHideTimer = null;
+
+        const w = 340, h = 340;
+        const centerX = 170, centerY = 170;
+        const radius = 150;
+        const lineWidth = 14;
+
+        function drawBackgroundSectors() {
+            ctxBg.clearRect(0, 0, w, h);
+            
+            const sectorAngle = (2 * Math.PI) / 4;
+            
+            for (let i = 0; i < 4; i++) {
+                const startAngle = i * sectorAngle - Math.PI / 2;
+                const endAngle = (i + 1) * sectorAngle - Math.PI / 2;
+
+                ctxBg.beginPath();
+                ctxBg.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctxBg.lineWidth = lineWidth;
+                
+                const gradient = ctxBg.createConicGradient(startAngle + sectorAngle/2, centerX, centerY);
+                
+                if (i === 0) {
+                    gradient.addColorStop(0, '#cfa4ff');
+                    gradient.addColorStop(1, '#b280e0');
+                } else if (i === 1) {
+                    gradient.addColorStop(0, '#dbb5ff');
+                    gradient.addColorStop(1, '#c29bf0');
+                } else if (i === 2) {
+                    gradient.addColorStop(0, '#f0c0ff');
+                    gradient.addColorStop(1, '#d4a3f0');
+                } else {
+                    gradient.addColorStop(0, '#f5ccff');
+                    gradient.addColorStop(1, '#e0b3ff');
+                }
+                
+                ctxBg.strokeStyle = gradient;
+                ctxBg.stroke();
+            }
+
+            ctxBg.lineWidth = 1.2;
+            
+            for (let i = 0; i <= 4; i++) {
+                const angle = i * (Math.PI * 2 / 4) - Math.PI / 2;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                ctxBg.beginPath();
+                ctxBg.moveTo(centerX, centerY);
+                ctxBg.lineTo(x, y);
+                ctxBg.strokeStyle = 'rgba(210, 170, 255, 0.25)';
+                ctxBg.stroke();
+            }
+            
+            ctxBg.beginPath();
+            ctxBg.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+            ctxBg.fillStyle = 'rgba(255, 230, 255, 0.15)';
+            ctxBg.filter = 'blur(8px)';
+            ctxBg.fill();
+            ctxBg.filter = 'none';
+        }
+
+        function drawCloudEffect(cycleElapsed) {
+            ctxCloud.clearRect(0, 0, w, h);
+            
+            if (cycleElapsed === undefined) return;
+            
+            const halfCycle = CYCLE_DURATION / 2;
+            
+            let cloudBaseRadius;
+            let opacity;
+            
+            if (cycleElapsed < halfCycle) {
+                const expandProgress = cycleElapsed / halfCycle;
+                cloudBaseRadius = radius * (0.4 + 0.8 * expandProgress);
+                opacity = 0.25 + 0.5 * expandProgress;
+            } else {
+                const shrinkProgress = (cycleElapsed - halfCycle) / halfCycle;
+                cloudBaseRadius = radius * (1.2 - 0.8 * shrinkProgress);
+                opacity = 0.75 - 0.5 * shrinkProgress;
+            }
+            
+            const colors = [
+                `rgba(235, 200, 255, ${opacity * 0.4})`,
+                `rgba(255, 215, 250, ${opacity * 0.5})`,
+                `rgba(220, 180, 255, ${opacity * 0.3})`,
+                `rgba(255, 190, 230, ${opacity * 0.35})`,
+                `rgba(245, 225, 255, ${opacity * 0.6})`
+            ];
+            
+            ctxCloud.filter = 'blur(18px)';
+            
+            for (let layer = 0; layer < 6; layer++) {
+                const layerRadius = cloudBaseRadius + (layer - 2) * 10;
+                const layerColor = colors[layer % colors.length];
+                
+                ctxCloud.beginPath();
+                ctxCloud.arc(centerX, centerY, layerRadius, 0, 2 * Math.PI);
+                ctxCloud.fillStyle = layerColor;
+                ctxCloud.fill();
+            }
+            
+            ctxCloud.filter = 'blur(22px)';
+            ctxCloud.beginPath();
+            ctxCloud.arc(centerX, centerY, cloudBaseRadius * 0.5, 0, 2 * Math.PI);
+            ctxCloud.fillStyle = `rgba(255, 225, 255, ${opacity * 0.35})`;
+            ctxCloud.fill();
+            
+            ctxCloud.filter = 'blur(30px)';
+            ctxCloud.beginPath();
+            ctxCloud.arc(centerX, centerY, cloudBaseRadius + 20, 0, 2 * Math.PI);
+            ctxCloud.fillStyle = `rgba(220, 180, 255, ${opacity * 0.2})`;
+            ctxCloud.fill();
+            
+            ctxCloud.filter = 'none';
+        }
+
+        function drawProgressOverlay(phaseIndex, progressInPhase) {
+            ctxFg.clearRect(0, 0, w, h);
+
+            const sectorAngle = (2 * Math.PI) / 4;
+            const startSector = phaseIndex * sectorAngle - Math.PI / 2;
+            const currentEndAngle = startSector + progressInPhase * sectorAngle;
+
+            ctxFg.beginPath();
+            ctxFg.arc(centerX, centerY, radius, startSector, currentEndAngle);
+            ctxFg.strokeStyle = '#ffecdd';
+            ctxFg.lineWidth = lineWidth + 2;
+            ctxFg.shadowColor = '#ffb3ff';
+            ctxFg.shadowBlur = 15;
+            ctxFg.stroke();
+
+            const dotX = centerX + radius * Math.cos(currentEndAngle);
+            const dotY = centerY + radius * Math.sin(currentEndAngle);
+            ctxFg.beginPath();
+            ctxFg.arc(dotX, dotY, 10, 0, 2 * Math.PI);
+            ctxFg.fillStyle = '#ffecf0';
+            ctxFg.shadowBlur = 20;
+            ctxFg.fill();
+            
+            ctxFg.shadowBlur = 0;
+        }
+
+        function updatePhaseLabel(phaseIndex) {
+            phaseNameEl.textContent = CYCLE_PHASES[phaseIndex];
+            phaseHintEl.textContent = HINTS[CYCLE_PHASES[phaseIndex]] || 'следуй ритму';
+        }
+
+        function formatTime(sec) {
+            const mins = Math.floor(sec / 60);
+            const seconds = sec % 60;
+            return `${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            timeLeftEl.textContent = formatTime(Math.ceil(timeRemaining));
+        }
+
+        function stopAll() {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            isRunning = false;
+            startBtn.textContent = '▶ СТАРТ';
+            soundManager.pause();
+        }
+
+        function resetAfterCompletion() {
+            hideCompletionOverlay();
+            resetToInitialState();
+        }
+
+        function hideCompletionOverlay() {
+            completionOverlay.classList.remove('show');
+        }
+
+        function showCompletionOverlay() {
+            completionOverlay.classList.add('show');
+            
+            if (autoHideTimer) {
+                clearTimeout(autoHideTimer);
+                autoHideTimer = null;
+            }
+            
+            autoHideTimer = setTimeout(() => {
+                resetAfterCompletion();
+                autoHideTimer = null;
+            }, 5000);
+        }
+
+        function resetToInitialState() {
+            stopAll();
+            timeRemaining = totalSeconds;
+            sessionStartTime = null;
+            elapsedBeforeStart = 0;
+            
+            updateTimerDisplay();
+            updatePhaseLabel(0);
+            drawProgressOverlay(0, 0);
+            drawCloudEffect(0);
+        }
+
+        function updateDisplayFromElapsed(elapsedSeconds) {
+            elapsedSeconds = Math.min(elapsedSeconds, totalSeconds);
+            timeRemaining = Math.max(0, totalSeconds - elapsedSeconds);
+            updateTimerDisplay();
+
+            if (elapsedSeconds >= totalSeconds) {
+                updatePhaseLabel(0);
+                drawProgressOverlay(0, 0);
+                drawCloudEffect(0);
+                showCompletionOverlay();
+                return;
+            }
+
+            const elapsedInCycle = elapsedSeconds % CYCLE_DURATION;
+            const phaseIndex = Math.floor(elapsedInCycle / PHASE_DURATION);
+            const progressInPhase = (elapsedInCycle % PHASE_DURATION) / PHASE_DURATION;
+
+            updatePhaseLabel(phaseIndex);
+            drawProgressOverlay(phaseIndex, progressInPhase);
+            drawCloudEffect(elapsedInCycle);
+        }
+
+        function animationLoop() {
+            if (!isRunning) return;
+
+            const now = performance.now();
+            const elapsedFromStart = (now - sessionStartTime) / 1000;
+            const totalElapsed = elapsedBeforeStart + elapsedFromStart;
+
+            if (totalElapsed >= totalSeconds) {
+                updateDisplayFromElapsed(totalSeconds);
+                stopAll();
+                sessionStartTime = null;
+                elapsedBeforeStart = 0;
+                return;
+            }
+
+            updateDisplayFromElapsed(totalElapsed);
+            rafId = requestAnimationFrame(animationLoop);
+        }
+
+        function startSession() {
+            if (isRunning) return;
+            
+            hideCompletionOverlay();
+            
+            if (autoHideTimer) {
+                clearTimeout(autoHideTimer);
+                autoHideTimer = null;
+            }
+            
+            if (timeRemaining <= 0) resetToInput();
+
+            stopAll();
+            sessionStartTime = performance.now();
+            elapsedBeforeStart = totalSeconds - timeRemaining;
+            isRunning = true;
+            startBtn.textContent = '⏸ ПАУЗА';
+            
+            soundManager.onUserInteraction();
+            soundManager.play();
+            
+            rafId = requestAnimationFrame(animationLoop);
+        }
+
+        function pauseSession() {
+            if (!isRunning) return;
+            
+            if (sessionStartTime) {
+                const now = performance.now();
+                const elapsedFromStart = (now - sessionStartTime) / 1000;
+                elapsedBeforeStart += elapsedFromStart;
+                sessionStartTime = null;
+            }
+            
+            stopAll();
+        }
+
+        function resetToInput() {
+            stopAll();
+            hideCompletionOverlay();
+            
+            if (autoHideTimer) {
+                clearTimeout(autoHideTimer);
+                autoHideTimer = null;
+            }
+            
+            let mins = parseInt(minutesInput.value, 10);
+            if (isNaN(mins) || mins < 1) mins = 5;
+            if (mins > 60) mins = 60;
+            
+            const cyclesCount = Math.max(1, Math.round((mins * 60) / CYCLE_DURATION));
+            totalSeconds = cyclesCount * CYCLE_DURATION;
+            
+            minutesInput.value = Math.floor(totalSeconds / 60);
+            
+            timeRemaining = totalSeconds;
+            sessionStartTime = null;
+            elapsedBeforeStart = 0;
+            
+            updateTimerDisplay();
+            updatePhaseLabel(0);
+            drawProgressOverlay(0, 0);
+            ctxCloud.clearRect(0, 0, w, h);
+        }
+
+        function toggleStartPause() {
+            if (isRunning) pauseSession();
+            else startSession();
+        }
+
+        function updateSoundUI() {
+            soundToggle.textContent = soundManager.getVolumeIcon();
+            soundToggle.classList.toggle('muted', !soundManager.isEnabled);
+            volumeControl.classList.toggle('hidden', !soundManager.isEnabled);
+            
+            soundOptions.forEach(opt => {
+                if (opt.dataset.sound === soundManager.currentSound) {
+                    opt.classList.add('active');
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
+            
+            volumeSlider.value = soundManager.volume;
+        }
+
+        function initSoundControls() {
+            soundManager.init();
+            
+            soundToggle.addEventListener('click', () => {
+                soundManager.onUserInteraction();
+                const enabled = soundManager.toggleEnabled();
+                updateSoundUI();
+                
+                if (enabled && isRunning) {
+                    soundManager.play();
+                }
+            });
+            
+            volumeSlider.addEventListener('input', (e) => {
+                soundManager.onUserInteraction();
+                soundManager.setVolume(parseFloat(e.target.value));
+                updateSoundUI();
+            });
+            
+            soundOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const soundName = option.dataset.sound;
+                    if (soundManager.currentSound === soundName) return;
+                    
+                    soundManager.onUserInteraction();
+                    soundManager.setSound(soundName);
+                    updateSoundUI();
+                });
+            });
+            
+            updateSoundUI();
+            
+            document.body.addEventListener('click', () => {
+                soundManager.onUserInteraction();
+            });
+        }
+
+        function init() {
+            drawBackgroundSectors();
+            resetToInput();
+            initSoundControls();
+
+            startBtn.addEventListener('click', toggleStartPause);
+            resetBtn.addEventListener('click', () => {
+                pauseSession();
+                resetToInput();
+            });
+            
+            minutesInput.addEventListener('change', () => {
+                if (!isRunning) resetToInput();
+            });
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
